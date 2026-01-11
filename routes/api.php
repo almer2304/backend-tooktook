@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +14,16 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::middleware('role:admin')->group(function(){
+
+    });
+
+    Route::middleware('role:store')->group(function(){
+        Route::apiResource('/store', StoreController::class);
+    });
+
+    Route::middleware('role:user')->group(function(){
+        Route::apiResource('/all/store', StoreController::class)->only('index'); 
+    });
 });
