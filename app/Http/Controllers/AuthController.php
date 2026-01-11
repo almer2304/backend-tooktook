@@ -12,14 +12,16 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique',
-            'password' => 'required|min:5|confirmed'
+            'email' => 'required|email',
+            'password' => 'required|min:5|confirmed',
+            'role' => 'required|in:user,store,admin'  
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
+            'role' => $request->role
         ]);
 
         return response()->json([
@@ -47,9 +49,35 @@ class AuthController extends Controller
 
         $token = $user->createToken('token')->plainTextToken;
 
+        if($user->role === 'user'){
+            return response()->json([
+                'message' => 'Anda berhasil login sebagai user',
+                'token' => $token,
+                'role' => $user->role
+            ]);
+        }
+        if($user->role === 'store'){
+            return response()->json([
+                'message' => 'Anda berhasil login sebagai store',
+                'token' => $token,
+                'role' =>  $user->role
+            ]);
+        }
+        if($user->role === 'admin'){
+            return response()->json([
+                'message' => 'Anda berhasil login sebagai admin',
+                'token' => $token,
+                'role' => $user->role
+            ]);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
         return response()->json([
-            'message' => 'Anda berhasil login',
-            'token' => $token
+            'message' => 'Anda berhasil logout'
         ]);
     }
 }
