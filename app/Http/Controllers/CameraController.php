@@ -49,4 +49,27 @@ class CameraController extends Controller
             'camera' => $camera
         ]);
     }
+
+    public function update(Request $request, Camera $camera)
+    {
+        $validated = $request->validate([
+            'store_id' => 'sometimes|exists:stores,id',
+            'name' => 'sometimes|string|max:100',
+            'description' => 'nullable|string',
+            'stock' => 'sometimes|integer',
+            'price_per_day' => 'sometimes|integer'
+        ]);
+
+        $store = Store::find($request->user_id);
+
+        if($store->user_id !== auth()->id()){
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $camera->update($validated);
+
+        return response()->json([$camera]);
+    }
 }
