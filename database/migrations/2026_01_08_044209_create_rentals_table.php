@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('rentals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('cameras_id')->constrained()->cascadeOnDelete();
             $table->date('start_date');
             $table->date('due_date');
             $table->date('returned_at')->nullable();
