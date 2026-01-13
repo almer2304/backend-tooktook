@@ -17,12 +17,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::middleware('role:admin')->group(function(){
-
-    });
-
-    Route::middleware('role:store')->group(function(){
         Route::apiResource('/store', StoreController::class);
-        Route::apiResource('/camera', CameraController::class)->only('store', 'index');
+        Route::apiResource('/camera', CameraController::class)->only('store', 'index', 'update');
     });
 
     Route::middleware('role:user')->group(function(){

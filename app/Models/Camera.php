@@ -10,6 +10,6 @@ class Camera extends Model
 
     public function store()
     {
-        return $this->hasMany(Store::class);
+        return $this->belongsTo(Store::class);
     }
 }

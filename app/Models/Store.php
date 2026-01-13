@@ -11,4 +11,9 @@ class Store extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public function camera()
+    {
+        return $this->hasMany(Camera::class);
+    }
 }

@@ -37,7 +37,7 @@ class CameraController extends Controller
         }
 
         $camera = Camera::create([
-            'store_id' => $store,
+            'store_id' => $store->id,
             'name' => $request->name,
             'description' => $request->description,
             'stock' => $request->stock,
@@ -53,23 +53,35 @@ class CameraController extends Controller
     public function update(Request $request, Camera $camera)
     {
         $validated = $request->validate([
-            'store_id' => 'sometimes|exists:stores,id',
             'name' => 'sometimes|string|max:100',
             'description' => 'nullable|string',
             'stock' => 'sometimes|integer',
             'price_per_day' => 'sometimes|integer'
         ]);
 
-        $store = Store::find($request->user_id);
-
-        if($store->user_id !== auth()->id()){
+        if ($camera->store->user_id !== auth()->id()) {
             return response()->json([
-                'message' => 'Unauthorized'
+                'message' => 'Anda tidak memiliki akses ke camera ini'
             ], 403);
         }
 
         $camera->update($validated);
 
         return response()->json([$camera]);
+    }
+
+    public function delete(Camera $camera)
+    {
+        if($camera->store->user_id !== auth()->id()){
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses ke camera ini'
+            ]);
+        }
+
+        $camera->delete();
+
+        return response()->json([
+            'message' => 'Berhasil menghapus kamera'
+        ]);
     }
 }
