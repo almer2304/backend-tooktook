@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Symfony\Component\HttpKernel\HttpCache\Store;
 
 class User extends Authenticatable
 {
@@ -46,5 +47,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function camera()
+    {
+        return $this->hasMany(Camera::class);
+    }
+
+    public function rental()
+    {
+        return $this->belongsTo(Rental::class);
+    }
+
+    public function notification()
+    {
+        return $this->belongsTo(Notification::class);
     }
 }

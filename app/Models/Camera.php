@@ -12,4 +12,9 @@ class Camera extends Model
     {
         return $this->belongsTo(Store::class);
     }
+
+    public function rental()
+    {
+        return $this->hasMany(Rental::class, 'cameras_id');
+    }
 }

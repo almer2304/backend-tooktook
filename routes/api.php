@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::middleware('role:admin')->group(function(){
         Route::apiResource('/store', StoreController::class);
-        Route::apiResource('/camera', CameraController::class)->only('store', 'index', 'update');
+        Route::apiResource('/camera', CameraController::class)->except('show', 'create');
     });
 
     Route::middleware('role:user')->group(function(){
