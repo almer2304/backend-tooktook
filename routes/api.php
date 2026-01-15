@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CameraController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,11 @@ Route::middleware('auth:sanctum')->group(function(){
     });
 
     Route::middleware('role:user')->group(function(){
-        Route::apiResource('/all/store', StoreController::class)->only('index'); 
+        Route::apiResource('/all/store', StoreController::class)->only('index');
+        Route::get('/payments', [PaymentController::class, 'index']);
+        Route::post('/payments', [PaymentController::class, 'store']);
+        Route::get('/payments/{payment}', [PaymentController::class, 'show']);
+
+        Route::put('/payments/{payment}/pay', [PaymentController::class, 'pay']);
     });
 });

@@ -8,83 +8,78 @@ use Illuminate\Http\Request;
 
 class RentalController extends Controller
 {
+    /**
+     * USER: rental miliknya
+     * ADMIN: semua rental
+     */
+    public function index()
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            $rentals = Rental::with(['camera.store', 'user', 'payment'])->get();
+        } else {
+            $rentals = Rental::where('user_id', $user->id)->with(['camera.store', 'payment'])->get();
+        }
+
+        return response()->json($rentals);
+    }
+
+    /**
+     * USER membuat rental
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'cameras_id' => 'required|exists:cameras,id',
-            'start_date' => 'required|data',
-            'due_date' => 'required|date|after:start_daate'
+        if (auth()->user()->role !== 'user') {
+            return response()->json([
+                'message' => 'Hanya user yang dapat membuat rental'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'camera_id' => 'required|exists:cameras,id',
+            'start_date' => 'required|date',
+            'due_date' => 'required|date|after:start_date'
         ]);
 
-        $camera = Camera::with('store')->findOrFail($request->cameras_id);
+        $camera = Camera::findOrFail($validated['camera_id']);
 
-        if($camera->store->user_id === auth()->id()){
+        if ($camera->stock < 1) {
             return response()->json([
-                'message' => 'Anda tidak bisa meminjam barang sendiri'
-            ],403);
+                'message' => 'Stok kamera habis'
+            ], 400);
         }
 
         $rental = Rental::create([
             'user_id' => auth()->id(),
-            'cameras_id' => $camera->id,
-            'start_date' => $request->start_date,
-            'due_date' => $request->due_date,
+            'camera_id' => $camera->id,
+            'start_date' => $validated['start_date'],
+            'due_date' => $validated['due_date'],
             'status' => 'pending'
         ]);
 
         return response()->json([
             'message' => 'Rental berhasil dibuat',
             'rental' => $rental
-        ],201);
+        ], 201);
     }
 
-    //function buat liat peminjaman atau rental cameran miliknya
-    public function storeRentals()
+    /**
+     * Detail rental
+     */
+    public function show(Rental $rental)
     {
-        $rentals = Rental::whereHas('camera.store', function($q){
-            $q->where('user_id', auth()->id());
-        })->with(['camera', 'user'])->latest()->get();
-    }
+        $user = auth()->user();
 
-    public function approve(Rental $rental)
-    {
-        if ($rental->camera->store->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Forbidden'], 403);
+        if (
+            $user->role !== 'admin' &&
+            $rental->user_id !== $user->id
+        ) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $rental->update(['status' => 'approved']);
-
-        return response()->json(['message' => 'Rental disetujui']);
+        return response()->json(
+            $rental->load(['camera.store', 'payment'])
+        );
     }
-
-    public function reject(Rental $rental)
-    {
-        if ($rental->camera->store->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $rental->update(['status' => 'rejected']);
-
-        return response()->json(['message' => 'Rental ditolak']);
-    }
-
-    public function return(Rental $rental)
-    {
-        if ($rental->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $status = now()->gt($rental->due_date) ? 'late' : 'returned';
-
-        $rental->update([
-            'returned_at' => now(),
-            'status' => $status
-        ]);
-
-        return response()->json([
-            'message' => 'Camera berhasil dikembalikan',
-            'status' => $status
-        ]);
-    }
-
 }
