@@ -37,12 +37,12 @@ class RentalController extends Controller
         }
 
         $validated = $request->validate([
-            'camera_id' => 'required|exists:cameras,id',
+            'cameras_id' => 'required|exists:cameras,id',
             'start_date' => 'required|date',
             'due_date' => 'required|date|after:start_date'
         ]);
 
-        $camera = Camera::findOrFail($validated['camera_id']);
+        $camera = Camera::findOrFail($validated['cameras_id']);
 
         if ($camera->stock < 1) {
             return response()->json([
@@ -52,7 +52,7 @@ class RentalController extends Controller
 
         $rental = Rental::create([
             'user_id' => auth()->id(),
-            'camera_id' => $camera->id,
+            'cameras_id' => $camera->id,
             'start_date' => $validated['start_date'],
             'due_date' => $validated['due_date'],
             'status' => 'pending'
