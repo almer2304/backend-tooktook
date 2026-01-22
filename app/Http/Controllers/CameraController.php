@@ -17,6 +17,15 @@ class CameraController extends Controller
             'cameras' => $cameras
         ]);
     }
+
+    public function count()
+    {
+        $cameras = Camera::all();
+
+        $countCamera = count($cameras);
+
+        return response()->json(["Jumlah kamera" => $countCamera]);
+    }
     
     public function store(Request $request)
     {

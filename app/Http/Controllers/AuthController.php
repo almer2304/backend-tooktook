@@ -56,15 +56,8 @@ class AuthController extends Controller
                 'role' => $user->role
             ]);
         }
-        if($user->role === 'store'){
-            return response()->json([
-                'message' => 'Anda berhasil login sebagai store',
-                'token' => $token,
-                'role' =>  $user->role
-            ]);
-        }
-        if($user->role === 'admin'){
-            return response()->json([
+        elseif($user->role === 'admin'){
+            return response()->json([  
                 'message' => 'Anda berhasil login sebagai admin',
                 'token' => $token,
                 'role' => $user->role

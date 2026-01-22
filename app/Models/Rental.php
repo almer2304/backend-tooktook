@@ -18,4 +18,9 @@ class Rental extends Model
     {
         return $this->belongsTo(Camera::class, 'cameras_id');
     }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
 }

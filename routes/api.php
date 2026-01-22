@@ -24,15 +24,15 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::middleware('role:admin')->group(function(){
 
         // Store & Camera
-        Route::apiResource('/store', StoreController::class);
-        Route::apiResource('/camera', CameraController::class)->except(['show', 'create']);
+        Route::apiResource('/admin/store', StoreController::class);
+        Route::apiResource('/admin/camera', CameraController::class)->except(['show', 'create']);
 
         // Monitoring
-        Route::get('/rentals', [RentalController::class, 'index']);
-        Route::get('/rentals/{rental}', [RentalController::class, 'show']);
+        Route::get('/admin/rentals', [RentalController::class, 'index']);
+        Route::get('/admin/rentals/{rental}', [RentalController::class, 'show']);
 
-        Route::get('/payments', [PaymentController::class, 'index']);
-        Route::get('/payments/{payment}', [PaymentController::class, 'show']);
+        Route::get('/admin/payments', [PaymentController::class, 'index']);
+        Route::get('/admin/payments/{payment}', [PaymentController::class, 'show']);
     });
 
     /* ================= USER ================= */
@@ -40,6 +40,10 @@ Route::middleware('auth:sanctum')->group(function(){
 
         // Lihat semua store
         Route::get('/all/store', [StoreController::class, 'index']);
+
+        Route::get('/all/camera', [CameraController::class, 'index']);
+
+        Route::get('/count/camera', [CameraController::class, 'count']);
 
         // Rental
         Route::post('/rentals', [RentalController::class, 'store']);
