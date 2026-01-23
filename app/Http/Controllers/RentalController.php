@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rental;
 use App\Models\Camera;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RentalController extends Controller
@@ -25,50 +26,6 @@ class RentalController extends Controller
         return response()->json($rentals);
     }
 
-    /**
-     * USER membuat rental
-     */
-    public function store(Request $request)
-    {
-        if (auth()->user()->role !== 'user') {
-            return response()->json([
-                'message' => 'Hanya user yang dapat membuat rental'
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'cameras_id' => 'required|exists:cameras,id',
-            'start_date' => 'required|date',
-            'due_date' => 'required|date|after:start_date'
-        ]);
-
-        $camera = Camera::findOrFail($validated['cameras_id']);
-
-        if ($camera->stock < 1) {
-            return response()->json([
-                'message' => 'Stok kamera habis'
-            ], 400);
-        }
-
-        $camera->decrement('stock');
-
-        $rental = Rental::create([
-            'user_id' => auth()->id(),
-            'cameras_id' => $camera->id,
-            'start_date' => $validated['start_date'],
-            'due_date' => $validated['due_date'],
-            'status' => 'pending'
-        ]);
-
-        return response()->json([
-            'message' => 'Rental berhasil dibuat',
-            'rental' => $rental
-        ], 201);
-    }
-
-    /**
-     * Detail rental
-     */
     public function show(Rental $rental)
     {
         $user = auth()->user();
@@ -85,47 +42,75 @@ class RentalController extends Controller
         );
     }
 
-    public function approve(Rental $rental)
+    /**
+     * USER membuat rental
+     */
+    public function store(Request $request)
     {
-        if ($rental->status !== 'pending') {
-            return response()->json(['message' => 'Hanya rental pending yang bisa disetujui'], 400);
+        $validated = $request->validate([
+            'cameras_id' => 'required|exists:cameras,id',
+            'start_date' => 'required|date|after_or_equal:today',
+            'due_date' => 'required|date|after:start_date'
+        ]);
+
+        $camera = Camera::findOrFail($validated['cameras_id']);
+
+        if ($camera->stock < 1) {
+            return response()->json(['message' => 'Stok kamera habis'], 400);
         }
 
-        // Update status menjadi approved
-        $rental->update(['status' => 'approved']);
+        // LOGIKA HITUNG HARGA
+        $start = Carbon::parse($validated['start_date']);
+        $due = Carbon::parse($validated['due_date']);
+        $days = $start->diffInDays($due);   
+        $days = $days < 1 ? 1 : $days; // Minimal 1 hari
+        $totalPrice = $days * $camera->price_per_day;
 
-        return response()->json(['message' => 'Rental telah disetujui']);
+        return DB::transaction(function () use ($validated, $camera, $totalPrice) {
+            $camera->decrement('stock');
+
+            $rental = Rental::create([
+                'user_id' => auth()->id(),
+                'cameras_id' => $camera->id,
+                'start_date' => $validated['start_date'],
+                'due_date' => $validated['due_date'],
+                'total_price' => $totalPrice,
+                'status' => 'pending'
+            ]);
+
+            return response()->json([
+                'message' => 'Rental berhasil dipesan. Silahkan lakukan pembayaran.',
+                'total_days' => $days,
+                'rental' => $rental
+            ], 201);
+        });
     }
 
-    public function returnCamera(Rental $rental)
+    // ADMIN: Menyetujui rental (setelah cek pembayaran)
+    public function approve(Rental $rental)
     {
-        // Pastikan hanya rental yang 'approved' yang bisa dikembalikan
-        if ($rental->status !== 'approved') {
-            return response()->json(['message' => 'Kamera belum disetujui atau sudah dikembalikan'], 400);
+        if (auth()->user()->role !== 'admin') return response()->json(['message' => 'Forbidden'], 403);
+
+        if ($rental->payment && $rental->payment->status === 'paid') {
+            $rental->update(['status' => 'approved']);
+            return response()->json(['message' => 'Rental disetujui, kamera siap diambil']);
         }
 
-        \DB::transaction(function () use ($rental) {
-            // 1. Tambah stok kamera kembali
-            $rental->camera->increment('stock');
+        return response()->json(['message' => 'User belum membayar'], 400);
+    }
 
-            // 2. Ubah status rental
+    // ADMIN/USER: Mengembalikan kamera
+    public function returnCamera(Rental $rental)
+    {
+        if ($rental->status !== 'approved') {
+            return response()->json(['message' => 'Status rental tidak valid untuk pengembalian'], 400);
+        }
+
+        DB::transaction(function () use ($rental) {
+            $rental->camera->increment('stock');
             $rental->update(['status' => 'returned']);
         });
 
-        return response()->json([
-            'message' => 'Kamera berhasil dikembalikan, stok telah diperbarui',
-            'rental' => $rental->load('camera')
-        ]);
-    }
-
-    public function reject(Rental $rental)
-    {
-        if ($rental->status === 'pending') {
-            \DB::transaction(function () use ($rental) {
-                $rental->camera->increment('stock'); // Kembalikan stok
-                $rental->update(['status' => 'rejected']);
-            });
-            return response()->json(['message' => 'Rental ditolak, stok dikembalikan']);
-        }
+        return response()->json(['message' => 'Kamera berhasil dikembalikan, stok bertambah']);
     }
 }
