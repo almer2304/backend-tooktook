@@ -86,7 +86,7 @@ class PaymentController extends Controller
             return response()->json([
                 'message' => 'Sudah dibayar'
             ], 400);
-        }
+        }    
 
         $payment->update([
             'status' => 'paid',
