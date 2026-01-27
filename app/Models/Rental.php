@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User;
 
 class Rental extends Model
 {
-    protected $fillable = ['user_id', 'cameras_id', 'start_date', 'due_date', 'returned_at', 'status'];
+    protected $fillable = ['user_id', 'cameras_id', 'start_date', 'due_date', 'returned_at', 'status', 'total_price'];
 
     public function user()
     {

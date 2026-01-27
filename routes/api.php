@@ -21,20 +21,20 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout']);
 
     /* ================= ADMIN ================= */
-    Route::middleware('role:admin')->group(function(){
+    Route::prefix('admin')->middleware('role:admin')->group(function(){
 
         // Store & Camera
-        Route::apiResource('/admin/store', StoreController::class);
-        Route::apiResource('/admin/camera', CameraController::class)->except(['show', 'create']);
+        Route::apiResource('/store', StoreController::class);
+        Route::apiResource('/camera', CameraController::class)->except(['show', 'create']);
         
         // Monitoring
-        Route::get('/admin/rentals', [RentalController::class, 'index']);
-        Route::get('/admin/rentals/{rental}', [RentalController::class, 'show']);
-        Route::post('/admin/rentals/approve/{rental}', [RentalController::class, 'approve']);
-        Route::post('/admin/rentals/reject{rental}', [RentalController::class, 'reject']);
+        Route::get('/rentals', [RentalController::class, 'index']);
+        Route::get('/rentals/{rental}', [RentalController::class, 'show']);
+        Route::post('/rentals/approve/{rental}', [RentalController::class, 'approve']);
+        Route::post('/rentals/reject{rental}', [RentalController::class, 'reject']);
         
-        Route::get('/admin/payments', [PaymentController::class, 'index']);
-        Route::get('/admin/payments/{payment}', [PaymentController::class, 'show']);
+        Route::get('/payments', [PaymentController::class, 'index']);
+        Route::get('/payments/{payment}', [PaymentController::class, 'show']);
     });
 
     /* ================= USER ================= */

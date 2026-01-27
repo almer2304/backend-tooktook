@@ -6,6 +6,7 @@ use App\Models\Rental;
 use App\Models\Camera;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RentalController extends Controller
 {
@@ -66,7 +67,7 @@ class RentalController extends Controller
         $days = $days < 1 ? 1 : $days; // Minimal 1 hari
         $totalPrice = $days * $camera->price_per_day;
 
-        return DB::transaction(function () use ($validated, $camera, $totalPrice) {
+        return DB::transaction(function () use ($validated, $camera, $totalPrice, $days) {
             $camera->decrement('stock');
 
             $rental = Rental::create([
@@ -81,6 +82,7 @@ class RentalController extends Controller
             return response()->json([
                 'message' => 'Rental berhasil dipesan. Silahkan lakukan pembayaran.',
                 'total_days' => $days,
+                'total_price' => $totalPrice,
                 'rental' => $rental
             ], 201);
         });

@@ -14,6 +14,7 @@ class Payment extends Model
         'amount',
         'method',
         'status',
+        'total_price',
         'paid_at',
     ];
 
