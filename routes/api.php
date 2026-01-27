@@ -30,8 +30,8 @@ Route::middleware('auth:sanctum')->group(function(){
         // Monitoring
         Route::get('/rentals', [RentalController::class, 'index']);
         Route::get('/rentals/{rental}', [RentalController::class, 'show']);
-        Route::post('/rentals/approve/{rental}', [RentalController::class, 'approve']);
-        Route::post('/rentals/reject{rental}', [RentalController::class, 'reject']);
+        Route::post('/rentals/{rental}/approve', [RentalController::class, 'approve']);
+        Route::post('/rentals/{rental}/return', [RentalController::class, 'returnCamera']);
         
         Route::get('/payments', [PaymentController::class, 'index']);
         Route::get('/payments/{payment}', [PaymentController::class, 'show']);

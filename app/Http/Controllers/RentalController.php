@@ -93,12 +93,14 @@ class RentalController extends Controller
     {
         if (auth()->user()->role !== 'admin') return response()->json(['message' => 'Forbidden'], 403);
 
-        if ($rental->payment && $rental->payment->status === 'paid') {
-            $rental->update(['status' => 'approved']);
-            return response()->json(['message' => 'Rental disetujui, kamera siap diambil']);
+        // Pastikan sudah bayar dulu sebelum diambil
+        if (!$rental->payment || $rental->payment->status !== 'paid') {
+            return response()->json(['message' => 'User belum menyelesaikan pembayaran!'], 400);
         }
 
-        return response()->json(['message' => 'User belum membayar'], 400);
+        $rental->update(['status' => 'approved']);
+
+        return response()->json(['message' => 'Status Updated: Kamera telah diserahkan kepada user.']);
     }
 
     // ADMIN/USER: Mengembalikan kamera
