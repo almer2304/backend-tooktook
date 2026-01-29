@@ -98,7 +98,7 @@ class RentalController extends Controller
             return response()->json(['message' => 'User belum menyelesaikan pembayaran!'], 400);
         }
 
-        $rental->update(['status' => 'approved']);
+        $rental->load('payment')->update(['status' => 'approved']);
 
         return response()->json(['message' => 'Status Updated: Kamera telah diserahkan kepada user.']);
     }

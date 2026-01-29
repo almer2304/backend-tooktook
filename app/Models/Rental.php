@@ -21,6 +21,6 @@ class Rental extends Model
 
     public function payment()
     {
-        return $this->belongsTo(Payment::class);
+        return $this->hasOne(Payment::class, 'rental_id');
     }
 }
