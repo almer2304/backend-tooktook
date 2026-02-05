@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User;
 
 class Rental extends Model
 {
-    protected $fillable = ['user_id', 'cameras_id', 'start_date', 'due_date', 'returned_at', 'status', 'total_price'];
+    protected $fillable = ['user_id', 'camera_id', 'start_date', 'due_date', 'returned_at', 'status', 'total_price'];
 
     public function user()
     {
@@ -16,7 +16,7 @@ class Rental extends Model
 
     public function camera()
     {
-        return $this->belongsTo(Camera::class, 'cameras_id');
+        return $this->belongsTo(Camera::class);
     }
 
     public function payment()

@@ -8,43 +8,35 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    public function store(Request $request)
+    public function pay(Request $request, Rental $rental)
     {
-        $validated = $request->validate([
-            'rental_id' => 'required|exists:rentals,id',
-            'method' => 'required|string'
-        ]);
-
-        $rental = Rental::where('id', $validated['rental_id'])
-                        ->where('user_id', auth()->id())
-                        ->firstOrFail();
-
-        if ($rental->payment) {
-            return response()->json(['message' => 'Payment sudah ada'], 400);
-        }
-
-        $payment = Payment::create([
-            'rental_id' => $rental->id,
-            'amount' => $rental->total_price, // Diambil dari hasil hitung di RentalController
-            'method' => $validated['method'],
-            'status' => 'pending'
-        ]);
-
-        return response()->json(['message' => 'Tagihan pembayaran dibuat', 'payment' => $payment], 201);
-    }
-
-    public function pay(Payment $payment)
-    {
-        // Pastikan hanya owner yang bisa bayar
-        if ($payment->rental->user_id !== auth()->id()) {
+        if ($rental->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $payment->update([
-            'status' => 'paid',
-            'paid_at' => now()
+        if ($rental->payment && $rental->payment->status === 'paid') {
+            return response()->json(['message' => 'Sudah dibayar'], 400);
+        }
+
+        $request->validate([
+            'method' => 'required|in:cash,qris,debit'
         ]);
 
-        return response()->json(['message' => 'Pembayaran sukses, menunggu verifikasi admin']);
+        $payment = $rental->payment()->exists()
+            ? $rental->payment
+            : Payment::create([
+                'rental_id' => $rental->id,
+                'amount' => $rental->total_price,
+                'method' => $request->method,
+                'status' => 'paid',
+                'paid_at' => now()
+            ]);
+
+
+        return response()->json([
+            'message' => 'Pembayaran berhasil, menunggu persetujuan admin',
+            'payment' => $payment
+        ]);
     }
+
 }

@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function(){
         // Rental
         Route::post('/rentals', [RentalController::class, 'store']);
         Route::get('/rentals', [RentalController::class, 'index']);
+        Route::post('/rental/{rental}/pay', [PaymentController::class, 'pay']);
         Route::get('/rentals/{rental}', [RentalController::class, 'show']);
 
         // Payment

@@ -49,12 +49,12 @@ class RentalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'cameras_id' => 'required|exists:cameras,id',
+            'camera_id' => 'required|exists:cameras,id',
             'start_date' => 'required|date|after_or_equal:today',
             'due_date' => 'required|date|after:start_date'
         ]);
 
-        $camera = Camera::findOrFail($validated['cameras_id']);
+        $camera = Camera::findOrFail($validated['camera_id']);
 
         if ($camera->stock < 1) {
             return response()->json(['message' => 'Stok kamera habis'], 400);
@@ -72,7 +72,7 @@ class RentalController extends Controller
 
             $rental = Rental::create([
                 'user_id' => auth()->id(),
-                'cameras_id' => $camera->id,
+                'camera_id' => $camera->id,
                 'start_date' => $validated['start_date'],
                 'due_date' => $validated['due_date'],
                 'total_price' => $totalPrice,

@@ -10,6 +10,6 @@ class Camera extends Model
 
     public function rental()
     {
-        return $this->hasMany(Rental::class, 'cameras_id');
+        return $this->hasMany(Rental::class);
     }
 }
