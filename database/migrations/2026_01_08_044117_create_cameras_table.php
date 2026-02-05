@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('cameras', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
             $table->integer('stock');

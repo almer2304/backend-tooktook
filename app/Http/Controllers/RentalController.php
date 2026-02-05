@@ -117,4 +117,24 @@ class RentalController extends Controller
 
         return response()->json(['message' => 'Kamera berhasil dikembalikan, stok bertambah']);
     }
+
+    //fungsi reject rental, kalo misal user udah terlanjur minjem dan dia ngga jadi dateng 
+    public function reject(Rental $rental)
+    {
+        if (auth()->user()->role !== 'admin') return response()->json(['message' => 'Forbidden'], 403);
+
+        // Hanya bisa reject jika masih pending
+        if ($rental->status !== 'pending') {
+            return response()->json(['message' => 'Tidak bisa menolak rental yang sudah diproses'], 400);
+        }
+
+        DB::transaction(function () use ($rental) {
+            // KEMBALIKAN STOK karena tidak jadi dipinjam
+            $rental->camera->increment('stock');
+            
+            $rental->update(['status' => 'rejected']);
+        });
+
+        return response()->json(['message' => 'Rental ditolak dan stok dikembalikan.']);
+    }
 }

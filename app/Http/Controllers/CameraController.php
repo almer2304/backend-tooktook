@@ -30,23 +30,13 @@ class CameraController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'store_id' => 'required|exists:stores,id',
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
             'stock' => 'required|integer',
             'price_per_day' => 'required|integer'
         ]);
 
-        $store = Store::find($request->store_id);
-
-        if($store->user_id !== auth()->id()){
-            return response()->json([
-                'message' => 'Unauthorized'
-            ],403);
-        }
-
         $camera = Camera::create([
-            'store_id' => $store->id,
             'name' => $request->name,
             'description' => $request->description,
             'stock' => $request->stock,
@@ -68,12 +58,6 @@ class CameraController extends Controller
             'price_per_day' => 'sometimes|integer'
         ]);
 
-        if ($camera->store->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Anda tidak memiliki akses ke camera ini'
-            ], 403);
-        }
-
         $camera->update($validated);
 
         return response()->json([$camera]);
@@ -81,12 +65,6 @@ class CameraController extends Controller
 
     public function delete(Camera $camera)
     {
-        if($camera->store->user_id !== auth()->id()){
-            return response()->json([
-                'message' => 'Anda tidak memiliki akses ke camera ini'
-            ]);
-        }
-
         $camera->delete();
 
         return response()->json([

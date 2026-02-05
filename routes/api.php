@@ -5,6 +5,7 @@ use App\Http\Controllers\CameraController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RentalController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,9 +23,8 @@ Route::middleware('auth:sanctum')->group(function(){
 
     /* ================= ADMIN ================= */
     Route::prefix('admin')->middleware('role:admin')->group(function(){
+        Route::get('/profile', [UserController::class, 'forAdmin']);
 
-        // Store & Camera
-        Route::apiResource('/store', StoreController::class);
         Route::apiResource('/camera', CameraController::class)->except(['show', 'create']);
         
         // Monitoring
@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::get('/rentals/{rental}', [RentalController::class, 'show']);
         Route::post('/rentals/{rental}/approve', [RentalController::class, 'approve']);
         Route::post('/rentals/{rental}/return', [RentalController::class, 'returnCamera']);
+        Route::post('/rentals/{rental}/reject', [RentalController::class, 'reject']);
         
         Route::get('/payments', [PaymentController::class, 'index']);
         Route::get('/payments/{payment}', [PaymentController::class, 'show']);
@@ -40,9 +41,8 @@ Route::middleware('auth:sanctum')->group(function(){
     /* ================= USER ================= */
     Route::middleware('role:user')->group(function(){
 
+        Route::get('/profile', [UserController::class, 'forUser']);
         // Lihat semua store
-        Route::get('/all/store', [StoreController::class, 'index']);
-
         Route::get('/all/camera', [CameraController::class, 'index']);
 
         Route::get('/count/camera', [CameraController::class, 'count']);
@@ -51,8 +51,6 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('/rentals', [RentalController::class, 'store']);
         Route::get('/rentals', [RentalController::class, 'index']);
         Route::get('/rentals/{rental}', [RentalController::class, 'show']);
-        Route::post('/rentals/return/{rental}', [RentalController::class, 'returnCamera']);
-
 
         // Payment
         Route::get('/payments', [PaymentController::class, 'index']);
