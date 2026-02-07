@@ -23,4 +23,9 @@ class Rental extends Model
     {
         return $this->hasOne(Payment::class, 'rental_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

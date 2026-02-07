@@ -138,3 +138,4 @@ class RentalController extends Controller
         return response()->json(['message' => 'Rental ditolak dan stok dikembalikan.']);
     }
 }
+    

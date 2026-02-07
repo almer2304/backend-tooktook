@@ -61,11 +61,11 @@ class User extends Authenticatable
 
     public function rental()
     {
-        return $this->belongsTo(Rental::class);
+        return $this->hasMany(Rental::class);
     }
 
     public function notification()
     {
-        return $this->belongsTo(Notification::class);
+        return $this->hasMany(Notification::class);
     }
 }

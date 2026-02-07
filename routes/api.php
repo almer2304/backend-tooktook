@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CameraController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RentalController;
@@ -50,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function(){
         // Rental
         Route::post('/rentals', [RentalController::class, 'store']);
         Route::get('/rentals', [RentalController::class, 'index']);
-        Route::post('/rental/{rental}/pay', [PaymentController::class, 'pay']);
+        Route::post('/rentals/{rental}/pay', [PaymentController::class, 'pay']);
         Route::get('/rentals/{rental}', [RentalController::class, 'show']);
 
         // Payment
@@ -58,5 +59,15 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('/payments', [PaymentController::class, 'store']);
         Route::get('/payments/{payment}', [PaymentController::class, 'show']);
         Route::put('/payments/{payment}/pay', [PaymentController::class, 'pay']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/{notification}', [NotificationController::class, 'show']);
+        Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+        Route::delete('/notifications', [NotificationController::class, 'deleteAll']);
+        Route::get('/notifications/stats/overview', [NotificationController::class, 'statistics']);
+        Route::get('/notifications/unread/count', [NotificationController::class, 'unreadCount']);
     });
 });
