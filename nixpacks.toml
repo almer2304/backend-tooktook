@@ -1,13 +1,13 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.mbstring", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.ctype", "php82Extensions.fileinfo"]
+nixPkgs = ["php84", "php84Extensions.mbstring", "php84Extensions.pdo", "php84Extensions.pdo_mysql", "php84Extensions.tokenizer", "php84Extensions.xml", "php84Extensions.ctype", "php84Extensions.fileinfo", "php84Extensions.curl", "php84Extensions.dom"]
 
 [phases.build]
 cmds = [
-    "composer install --optimize-autoloader --no-dev",
+    "composer install --optimize-autoloader --no-dev --ignore-platform-reqs",
     "php artisan config:cache",
     "php artisan route:cache",
     "php artisan view:cache"
 ]
 
 [start]
-cmd = "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"   
+cmd = "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
